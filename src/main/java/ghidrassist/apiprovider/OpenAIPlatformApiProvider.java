@@ -21,6 +21,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class OpenAIPlatformApiProvider extends APIProvider implements FunctionCallingProvider, ModelListProvider, EmbeddingProvider {
     private static final Gson gson = new Gson();
@@ -699,6 +700,9 @@ public class OpenAIPlatformApiProvider extends APIProvider implements FunctionCa
         if (reasoning != null && reasoning.isEnabled()) {
             payload.addProperty("reasoning_effort", reasoning.getEffortString());
         }
+        else if (supportsNoReasoningEffort(model)) {
+            payload.addProperty("reasoning_effort", "none");
+        }
 
         JsonArray messagesArray = new JsonArray();
         for (ChatMessage message : messages) {
@@ -737,6 +741,22 @@ public class OpenAIPlatformApiProvider extends APIProvider implements FunctionCa
         payload.add("messages", messagesArray);
 
         return payload;
+    }
+
+    private boolean supportsNoReasoningEffort(String model) {
+        return Set.of(
+            "gpt-5.1",
+            "gpt-5.2",
+            "gpt-5.4",
+            "gpt-5.4-mini",
+            "gpt-5.4-nano",
+            "gpt-5.5",
+            "gpt-5.6-luna",
+            "gpt-5.6-sol",
+            "gpt-5.6-terra",
+            "gpt-6-luna",
+            "gpt-6-sol"
+        ).contains(model);
     }
 
     /**
